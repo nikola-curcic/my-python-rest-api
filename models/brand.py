@@ -6,19 +6,33 @@ class BrandModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
-
+    models = db.relationship("ModelModel", 
+                             lazy="dynamic", #bez dynamica odmah radi kveri i vraca objekte, a ovako vraca sam kveri, pa je potrebno .all()
+                             cascade="all,delete",
+                             backref="parent")
+    
     def __init__(self, name):
         self.name = name
 
     def json(self):
         return {
                 'id': self.id,
-                'name': self.name
+                'name': self.name,
+                'models': [model.json() for model in self.models.all()]
             }
 
     @classmethod
     def find_by_name(cls, name):
         return db.session.query(cls).filter(cls.name == name).first()
+
+    @classmethod
+    def find_by_id(cls, _id):
+        return db.session.query(cls).filter(cls.id == _id).first()
+
+    @classmethod
+    def find_by_part_of_name(cls, name):
+        name = name+"%"
+        return db.session.query(cls).filter(cls.name.like(name)).all()
 
     @classmethod
     def find_all(cls):
@@ -31,3 +45,9 @@ class BrandModel(db.Model):
     def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
+
+    def print_models(self):
+        print(self.models.all())
+
+
+
