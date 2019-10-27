@@ -7,9 +7,8 @@ class BrandModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
     models = db.relationship("ModelModel", 
-                             lazy="dynamic", #bez dynamica odmah radi kveri i vraca objekte, a ovako vraca sam kveri, pa je potrebno .all()
-                             cascade="all,delete",
-                             backref="parent")
+                             lazy="dynamic",    # without dynamic it performs query and returns object
+                             backref="parent")  # this way it does not return a result, so all() is necessary
     
     def __init__(self, name):
         self.name = name

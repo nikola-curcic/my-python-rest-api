@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restful import Api
-from resources.brand import Brand, BrandList, BrandUpdate
+from resources.brand import Brand, BrandList
 from resources.model import Model, ModelList
 
 
@@ -15,11 +15,10 @@ def create_tables():
     db.create_all()
 
 
-api.add_resource(Brand, "/brand")
-api.add_resource(BrandList, "/brandlist")
-api.add_resource(BrandUpdate, "/brandupdate")
-api.add_resource(Model, "/model")
-api.add_resource(ModelList, "/modellist")
+api.add_resource(Brand, "/brands/<string:name>")
+api.add_resource(BrandList, "/brands")
+api.add_resource(Model, "/models/<string:name>")
+api.add_resource(ModelList, "/models")
 
 
 if __name__ == "__main__":
