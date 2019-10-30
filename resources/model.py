@@ -6,16 +6,15 @@ class Model(Resource):
 
     parser = reqparse.RequestParser()
 
-    # mora da se doda u listu jer vraca objekat modela + naziv brenda
     def get(self, name):
-        if ModelModel.find_by_part_of_name(name.lower()):
-            return {
-                    "models":
-                    [ModelModel.json(model) for model in
-                     ModelModel.find_by_part_of_name(name.lower())]
-                    }, 200
-        return {"message": "No result for search '{}' "
-                           "in the database.".format(name)}, 401
+       if ModelModel.find_by_part_of_name(name.lower()):
+           return {
+                  "models":
+                  [ModelModel.full_json(model) for model in
+                  ModelModel.find_by_part_of_name(name.lower())]
+               }, 200
+       return {"message": "No result for search '{}' "
+                          "in the database.".format(name)}, 401
 
     def post(self, name):
         Model.parser.add_argument('id_brand',
@@ -24,27 +23,24 @@ class Model(Resource):
                                   help="id_brand is a mandatory field")
         data = Model.parser.parse_args()
 
-        model = ModelModel(name, data['id_brand'])
         if ModelModel.find_by_name(name.lower()):
             return {"message": "Model with name '{}' "
                                "already exists in the database."
                                .format(name)}, 401
+        model = ModelModel(name, data['id_brand'])                       
         model.save_to_db()
-        return ModelModel.json(ModelModel.find_by_name(name.lower()))
-        # a tuple is passed to the json method
-        # (object of class model, brand name)
+        return model.json()
 
-    def delete(self):
-        data = Model.parser.parse_args()
-        model = ModelModel.find_by_name(data['name'].lower())
+    def delete(self,name):
+        model = ModelModel.find_by_name(name.lower())
         if model:
             model.delete_from_db()
             return {"message": "Model with name '{}' "
                                "has been deleted."
-                               .format(data['name'])}, 200
+                               .format(name)}, 200
         return {"message": "Model with name '{}' "
                            "does not exist in the database"
-                           .format(data['name'])}, 401
+                           .format(name)}, 401
 
     def put(self, name):
         parser = reqparse.RequestParser()
@@ -70,4 +66,4 @@ class ModelList(Resource):
 
     def get(self):
         return {"models":
-                [ModelModel.json(model) for model in ModelModel.find_all()]}
+                [ModelModel.full_json(model) for model in ModelModel.find_all()]}

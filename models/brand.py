@@ -1,14 +1,16 @@
 from db import db
 
 
+
 class BrandModel(db.Model):
     __tablename__ = 'brands'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
     models = db.relationship("ModelModel", 
-                             lazy="dynamic",    # without dynamic it performs query and returns object
-                             backref="parent")  # this way it does not return a result, so all() is necessary
+                             lazy="dynamic",
+                             cascade="all,delete", # without dynamic it performs query and returns object
+                             backref="parent")     # this way it does not return a result, so all() is necessary
     
     def __init__(self, name):
         self.name = name
@@ -17,7 +19,7 @@ class BrandModel(db.Model):
         return {
                 'id': self.id,
                 'name': self.name,
-                'models': [model.json() for model in self.models.all()]
+                'models': [model.json_for_brand() for model in self.models.all()]
             }
 
     @classmethod
