@@ -3,7 +3,7 @@ from models.brand import BrandModel
 
 
 class ModelModel(db.Model):
-    __tablename__ = "models"
+    __tablename__ ='models'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))

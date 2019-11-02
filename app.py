@@ -1,18 +1,18 @@
 from flask import Flask
 from flask_restful import Api
+from flask_script import Manager, Shell
+from flask_migrate import Migrate, MigrateCommand
 from resources.brand import Brand, BrandList
 from resources.model import Model, ModelList
+from resources.user import User, UserList
+from resources.vehicletype import VehicleType
 
-
+    
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 api = Api(app)
-
-
-@app.before_first_request
-def create_tables():
-    db.create_all()
+manager = Manager(app)
 
 
 api.add_resource(Brand, "/brands/<string:name>")
@@ -24,5 +24,7 @@ api.add_resource(ModelList, "/models")
 if __name__ == "__main__":
     from db import db
     db.init_app(app)
-    app.run(debug=True)
+    migrate = Migrate(app, db)
+    manager.add_command('db',MigrateCommand)
+    manager.run()
 

@@ -3,7 +3,7 @@ from db import db
 
 
 class BrandModel(db.Model):
-    __tablename__ = 'brands'
+    __tablename__ ='brands'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
@@ -11,9 +11,18 @@ class BrandModel(db.Model):
                              lazy="dynamic",
                              cascade="all,delete", # without dynamic it performs query and returns object
                              backref="parent")     # this way it does not return a result, so all() is necessary
+    id_vehicle_type = db.Column(db.Integer, db.ForeignKey("vehicletypes.id"))
+    vehicle_type = db.relationship("VehicleTypeModel")
     
     def __init__(self, name):
         self.name = name
+
+
+    def json_for_vehicle_type(self):
+        return {
+                'id': self.id,
+                'name': self.name
+             }
 
     def json(self):
         return {
