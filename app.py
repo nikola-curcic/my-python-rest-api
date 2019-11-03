@@ -5,7 +5,7 @@ from flask_migrate import Migrate, MigrateCommand
 from resources.brand import Brand, BrandList
 from resources.model import Model, ModelList
 from resources.user import User, UserList
-from resources.vehicletype import VehicleType
+from resources.vehicletype import VehicleType, VehicleTypeList
 
     
 app = Flask(__name__)
@@ -19,6 +19,9 @@ api.add_resource(Brand, "/brands/<string:name>")
 api.add_resource(BrandList, "/brands")
 api.add_resource(Model, "/models/<string:name>")
 api.add_resource(ModelList, "/models")
+api.add_resource(VehicleType, "/vehicletypes/<string:name>")
+api.add_resource(VehicleTypeList, "/vehicletypes")
+
 
 
 if __name__ == "__main__":

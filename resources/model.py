@@ -1,6 +1,6 @@
 from flask_restful import Resource, reqparse
 from models.model import ModelModel
-
+from models.brand import BrandModel
 
 class Model(Resource):
 
@@ -17,7 +17,7 @@ class Model(Resource):
                           "in the database.".format(name)}, 401
 
     def post(self, name):
-        Model.parser.add_argument('id_brand',
+        Model.parser.add_argument("id_brand",
                                   type=int,
                                   required=True,
                                   help="id_brand is a mandatory field")
@@ -27,7 +27,11 @@ class Model(Resource):
             return {"message": "Model with name '{}' "
                                "already exists in the database."
                                .format(name)}, 401
-        model = ModelModel(name, data['id_brand'])                       
+        if not BrandModel.find_by_id(data["id_brand"]):
+            return {"message": "brand with id '{}' "
+                               "does not exist in the database"
+                               .format(data["id_brand"])}, 401
+        model = ModelModel(name, data["id_brand"])                       
         model.save_to_db()
         return model.json()
 

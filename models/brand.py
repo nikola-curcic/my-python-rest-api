@@ -1,5 +1,5 @@
 from db import db
-
+from models.vehicletype import VehicleTypeModel
 
 
 class BrandModel(db.Model):
@@ -11,18 +11,12 @@ class BrandModel(db.Model):
                              lazy="dynamic",
                              cascade="all,delete", # without dynamic it performs query and returns object
                              backref="parent")     # this way it does not return a result, so all() is necessary
-    id_vehicle_type = db.Column(db.Integer, db.ForeignKey("vehicletypes.id"))
+    id_vehicle_type = db.Column(db.Integer, db.ForeignKey("vehicletypes.id"), nullable=False)
     vehicle_type = db.relationship("VehicleTypeModel")
     
-    def __init__(self, name):
+    def __init__(self, name, id_vehicle_type):
         self.name = name
-
-
-    def json_for_vehicle_type(self):
-        return {
-                'id': self.id,
-                'name': self.name
-             }
+        self.id_vehicle_type = id_vehicle_type
 
     def json(self):
         return {
@@ -31,6 +25,20 @@ class BrandModel(db.Model):
                 'models': [model.json_for_brand() for model in self.models.all()]
             }
 
+    @classmethod
+    def full_json(cls, model):
+        return{
+            "id": model[0],  
+            "vehicle_type": model[1],  
+            "name": model[2] 
+            }
+    
+    def json_for_vehicle_type(self):
+        return {
+                'id': self.id,
+                'name': self.name
+             }
+    
     @classmethod
     def find_by_name(cls, name):
         return db.session.query(cls).filter(cls.name == name).first()
@@ -46,7 +54,8 @@ class BrandModel(db.Model):
 
     @classmethod
     def find_all(cls):
-        return db.session.query(cls).all()
+        return db.session.query(cls.id, VehicleTypeModel.vehicle_type, cls.name) \
+                 .join(VehicleTypeModel, isouter=True).all()
 
     def save_to_db(self):
         db.session.add(self)
@@ -56,8 +65,7 @@ class BrandModel(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def print_models(self):
-        print(self.models.all())
+    
 
 
 
