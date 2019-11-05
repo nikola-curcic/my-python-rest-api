@@ -1,18 +1,16 @@
 from flask_restful import Resource, reqparse
 from models.vehicletype import VehicleTypeModel
+from sqlalchemy import exc
 
 
 class VehicleType(Resource):
     
     def post(self,name):
-        if VehicleTypeModel.find_by_name(name.lower()):
-            return {
-                    "message":"Vehicle type with name '{}'"
-                              "already exists in the database."
-                              .format(name)
-                   },401
-        vehicle_type = VehicleTypeModel(name.lower())
-        vehicle_type.save_to_db()
+        try:        
+            vehicle_type = VehicleTypeModel(name.lower())
+            vehicle_type.save_to_db()
+        except exc.IntegrityError as e: # integrity errors from mysql
+            return {"message": "{}".format(e.orig.args[1])}, 401
         return vehicle_type.json()
 
     def delete(self,name):

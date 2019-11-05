@@ -6,7 +6,7 @@ class BrandModel(db.Model):
     __tablename__ ='brands'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80))
+    name = db.Column(db.String(80), unique=True)
     models = db.relationship("ModelModel", 
                              lazy="dynamic",
                              cascade="all,delete", # without dynamic it performs query and returns object

@@ -6,10 +6,11 @@ from resources.brand import Brand, BrandList
 from resources.model import Model, ModelList
 from resources.user import User, UserList
 from resources.vehicletype import VehicleType, VehicleTypeList
+import pymysql
 
     
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://nikola:kovin333@localhost/my_python_rest"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 api = Api(app)
 manager = Manager(app)

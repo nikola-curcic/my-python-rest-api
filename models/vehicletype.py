@@ -5,7 +5,7 @@ class VehicleTypeModel(db.Model):
     __tablename__='vehicletypes'
 
     id = db.Column(db.Integer, primary_key=True)
-    vehicle_type = db.Column(db.String(25))
+    vehicle_type = db.Column(db.String(25), unique=True)
     brands = db.relationship("BrandModel",
                               lazy="dynamic",
                               cascade="all,delete",

@@ -1,6 +1,8 @@
 from flask_restful import Resource, reqparse
 from models.model import ModelModel
 from models.brand import BrandModel
+from sqlalchemy import exc
+
 
 class Model(Resource):
 
@@ -22,17 +24,11 @@ class Model(Resource):
                                   required=True,
                                   help="id_brand is a mandatory field")
         data = Model.parser.parse_args()
-
-        if ModelModel.find_by_name(name.lower()):
-            return {"message": "Model with name '{}' "
-                               "already exists in the database."
-                               .format(name)}, 401
-        if not BrandModel.find_by_id(data["id_brand"]):
-            return {"message": "brand with id '{}' "
-                               "does not exist in the database"
-                               .format(data["id_brand"])}, 401
-        model = ModelModel(name, data["id_brand"])                       
-        model.save_to_db()
+        try:        
+            model = ModelModel(name, data["id_brand"])                       
+            model.save_to_db()
+        except exc.IntegrityError as e: # integrity errors from mysql
+            return {"message": "{}".format(e.orig.args[1])}, 401
         return model.json()
 
     def delete(self,name):
