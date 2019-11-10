@@ -8,7 +8,7 @@ class UserModel(db.Model):
     __tablename__ ='users'
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80))
+    username = db.Column(db.String(80), unique=True)
     password = db.Column(db.String(192))
     time_created = db.Column(db.String(25))
     user_level = db.Column(db.String(5))
@@ -17,7 +17,7 @@ class UserModel(db.Model):
         self.username = username
         self.password = password
         self.time_created = time_created
-        self.user_level = 'user'
+        self.user_level = 'admin'
 
     def json(self):
         return {
@@ -35,14 +35,9 @@ class UserModel(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    @classmethod
-    def drop_table(cls):
-        db.session.execute("DELETE FROM users WHERE id=2")
-        db.session.commit()
-        return db.engine.execute("SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';")
 
     @classmethod
-    def hash_password(self, password):
+    def hash_password(cls, password):
         """Hash a password for storing."""
         salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
         pwdhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'),
@@ -50,6 +45,18 @@ class UserModel(db.Model):
         pwdhash = binascii.hexlify(pwdhash)
         return (salt + pwdhash).decode('ascii')
 
+    @classmethod
+    def verify_password(cls, stored_password, provided_password):
+        """Verify a stored password against one provided by user"""
+        salt = stored_password[:64]
+        stored_password = stored_password[64:]
+        pwdhash = hashlib.pbkdf2_hmac('sha512',
+                                    provided_password.encode('utf-8'),
+                                    salt.encode('ascii'),
+                                    100000)
+        pwdhash = binascii.hexlify(pwdhash).decode('ascii')
+        return pwdhash == stored_password
+   
     @classmethod
     def find_by_username(cls, username):
         return cls.query.filter_by(username=username).first()
@@ -69,19 +76,4 @@ class UserModel(db.Model):
 
 
 
-'''
-def verify_password(stored_password, provided_password):
-    """Verify a stored password against one provided by user"""
-    salt = stored_password[:64]
-    stored_password = stored_password[64:]
-    pwdhash = hashlib.pbkdf2_hmac('sha512',
-                                  provided_password.encode('utf-8'),
-                                  salt.encode('ascii'),
-                                  100000)
-    pwdhash = binascii.hexlify(pwdhash).decode('ascii')
-    return pwdhash == stored_password
 
-
-stored_password = hash_password('ThisIsAPassWord')
-print(verify_password(stored_password, 'ThisIsAPassWords'))
-'''

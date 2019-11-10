@@ -2,47 +2,47 @@ from flask_restful import Resource, reqparse
 from models.user import UserModel
 from werkzeug.security import safe_str_cmp
 from datetime import datetime
-
-
-_user_parser = reqparse.RequestParser()
-
+from sqlalchemy import exc
 
 class UserRegister(Resource):
 
-    def post(self):
-        data = _user_parser.parse_args()
-        if UserModel.find_by_username(data['username']):
-            return {"message": "A user with that username already exists"}, 400
-        user = UserModel(
-                         data['username'],
+    parser = reqparse.RequestParser()
+
+    def post(self, name):
+        UserRegister.parser.add_argument("password",
+                                          type=str,
+                                          required=True,
+                                          help="password is a mandatory field")
+        data = UserRegister.parser.parse_args()  
+        try:        
+           user = UserModel(
+                         name,
                          UserModel.hash_password(data['password']),
                          datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                          )
-        user.save_to_db()
-        result = UserModel.find_all()
-        for row in result:
-            print(row.json())
+           user.save_to_db()
+        except exc.IntegrityError as e: # integrity errors from mysql
+            return {"message": "{}".format(e.orig.args[1])}, 401
+        
         return {"message": "user created successfully"}, 201
 
 
 class User(Resource):
 
-    @classmethod
-    def get(cls, user_id):
+    def get(self, user_id):
         user = UserModel.find_by_id(user_id)
         if user:
             return user.json(), 201
-        return {"message": "user not found in the database"}, 401
+        return {"message": "user not found in the database"}, 404
 
-    @classmethod
-    def delete(cls, user_id):
+    def delete(self, user_id):
         user = UserModel.find_by_id(user_id)
         if user:
             user.delete_from_db(), 200
             return {
                     "message": "user succesfully deleted from the database"
                    }, 200
-        return {"message": "user not found in the database"}, 401
+        return {"message": "user not found in the database"}, 404
 
 
 class UserList(Resource):
@@ -53,10 +53,18 @@ class UserList(Resource):
 
 class UserLogin(Resource):
 
-    @classmethod
-    def post(cls):
-        data = _user_parser.parse_args()
-        user = UserModel.find_by_username(data["username"])
+    parser = reqparse.RequestParser()
+
+    def post(self, name):
+        UserLogin.parser.add_argument("password",
+                                       type=str,
+                                       required=True,
+                                       help="password is a mandatory field")
+        data = UserLogin.parser.parse_args()  
+        
+        user = UserModel.find_by_username(name)
+
+        return UserModel.verify_password(user.password, data["password"])
 
         if user and safe_str_cmp(user.password, data["password"]):
              access_token = create_access_token(identity=user.id, fresh=True)
