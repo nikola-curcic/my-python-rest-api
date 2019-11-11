@@ -2,22 +2,28 @@ import hashlib
 import binascii
 import os
 from db import db
-
+from flask import current_app
 
 class UserModel(db.Model):
     __tablename__ ='users'
 
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True)
+    email = db.Column(db.String(80), unique=True)
     password = db.Column(db.String(192))
     time_created = db.Column(db.String(25))
     user_level = db.Column(db.String(5))
 
-    def __init__(self, username, password, time_created):
+    def __init__(self, username, email, password, time_created):
         self.username = username
+        self.email = email
         self.password = password
         self.time_created = time_created
-        self.user_level = 'admin'
+        if self.email == current_app.config['APP_ADMIN']:
+            self.user_level = 'admin'
+        else:
+            self.user_level = 'user'
+            
 
     def json(self):
         return {

@@ -9,6 +9,10 @@ class UserRegister(Resource):
     parser = reqparse.RequestParser()
 
     def post(self, name):
+        UserRegister.parser.add_argument("email",
+                                          type=str,
+                                          required=True,
+                                          help="email is a mandatory field")
         UserRegister.parser.add_argument("password",
                                           type=str,
                                           required=True,
@@ -17,6 +21,7 @@ class UserRegister(Resource):
         try:        
            user = UserModel(
                          name,
+                         data['email'],
                          UserModel.hash_password(data['password']),
                          datetime.now().strftime("%d/%m/%Y %H:%M:%S")
                          )
