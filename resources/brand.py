@@ -17,6 +17,7 @@ class Brand(Resource):
         return {"message": "no result for search '{}' "
                            "in the database".format(name)}, 401
 
+    @admin_required
     def post(self, name):
         parser = reqparse.RequestParser()
         parser.add_argument("id_vehicle_type",
@@ -31,6 +32,7 @@ class Brand(Resource):
             return {"message": "{}".format(e.orig.args[1])}, 401
         return brand.json()
 
+    @admin_required
     def delete(self, name):
         brand = BrandModel.find_by_name(name.lower())
         if brand:
@@ -42,6 +44,7 @@ class Brand(Resource):
                            "does not exist in the database"
                            .format(name)}, 401
 
+    @admin_required
     def put(self, name):
         if BrandModel.find_by_name(name.lower()):
             return {"message": "Brand with name '{}' "

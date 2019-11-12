@@ -15,5 +15,5 @@ def add_routes(api):
     api.add_resource(UserRegister, "/register/<string:name>")
     api.add_resource(User, "/users/<int:user_id>")
     api.add_resource(UserList, "/users")
-    api.add_resource(UserLogin, "/login/<string:name>")
+    api.add_resource(UserLogin, "/login")
     return api

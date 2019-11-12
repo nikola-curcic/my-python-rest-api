@@ -4,6 +4,7 @@ import os
 from db import db
 from flask import current_app
 
+
 class UserModel(db.Model):
     __tablename__ ='users'
 
@@ -24,7 +25,6 @@ class UserModel(db.Model):
         else:
             self.user_level = 'user'
             
-
     def json(self):
         return {
                "id": self.id,
@@ -57,9 +57,9 @@ class UserModel(db.Model):
         salt = stored_password[:64]
         stored_password = stored_password[64:]
         pwdhash = hashlib.pbkdf2_hmac('sha512',
-                                    provided_password.encode('utf-8'),
-                                    salt.encode('ascii'),
-                                    100000)
+                                      provided_password.encode('utf-8'),
+                                      salt.encode('ascii'),
+                                      100000)
         pwdhash = binascii.hexlify(pwdhash).decode('ascii')
         return pwdhash == stored_password
    

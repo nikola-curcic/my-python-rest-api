@@ -5,6 +5,7 @@ from sqlalchemy import exc
 
 class VehicleType(Resource):
     
+    @admin_required
     def post(self,name):
         try:        
             vehicle_type = VehicleTypeModel(name.lower())
@@ -13,6 +14,7 @@ class VehicleType(Resource):
             return {"message": "{}".format(e.orig.args[1])}, 401
         return vehicle_type.json()
 
+    @admin_required
     def delete(self,name):
         vehicle_type = VehicleTypeModel.find_by_name(name.lower())
         if vehicle_type:
@@ -24,6 +26,7 @@ class VehicleType(Resource):
                            "does not exist in the database"
                            .format(name)}, 401
 
+    @admin_required
     def put(self,name):
         parser = reqparse.RequestParser()
         parser.add_argument("id",

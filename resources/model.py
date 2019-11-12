@@ -18,6 +18,7 @@ class Model(Resource):
        return {"message": "No result for search '{}' "
                           "in the database.".format(name)}, 401
 
+    @admin_required
     def post(self, name):
         Model.parser.add_argument("id_brand",
                                   type=int,
@@ -31,6 +32,7 @@ class Model(Resource):
             return {"message": "{}".format(e.orig.args[1])}, 401
         return model.json()
 
+    @admin_required
     def delete(self,name):
         model = ModelModel.find_by_name(name.lower())
         if model:
@@ -42,6 +44,7 @@ class Model(Resource):
                            "does not exist in the database"
                            .format(name)}, 401
 
+    @admin_required
     def put(self, name):
         parser = reqparse.RequestParser()
         parser.add_argument('id',
